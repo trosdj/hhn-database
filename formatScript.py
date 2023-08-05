@@ -1,6 +1,6 @@
-input = open('input.txt', 'r')
-output = open('output.txt', 'a')
+file_input = open('input.txt', 'r')
+file_output = open('output.txt', 'a')
 
-for line in input:
+for line in file_input:
     line = line.rstrip()
-    output.write("('" + line + "')\n")
+    file_output.write("('" + line + "')\n")

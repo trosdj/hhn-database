@@ -18,6 +18,7 @@ DROP TABLE IF EXISTS attraction;
 DROP TABLE IF EXISTS hhn_event;
 DROP TABLE IF EXISTS attraction_location;
 DROP TABLE IF EXISTS resort;
+DROP TABLE IF EXISTS attraction_type;
 
 -- create the resort table 
 CREATE TABLE resort (
@@ -33,6 +34,14 @@ CREATE TABLE attraction_location (
     location_name   VARCHAR(75)     NOT NULL,
      
     PRIMARY KEY(location_id)
+); 
+
+-- create the attraction_type table
+CREATE TABLE attraction_type (
+    type_id     INT             NOT NULL        AUTO_INCREMENT,
+    type_name   VARCHAR(75)     NOT NULL,
+     
+    PRIMARY KEY(type_id)
 ); 
 
 -- create the hhn_event table
@@ -54,7 +63,7 @@ CREATE TABLE attraction (
     attraction_id   INT             NOT NULL        AUTO_INCREMENT,
     attraction_name  VARCHAR(75)     NOT NULL,
     attraction_description   VARCHAR(255)     NOT NULL,
-    attraction_type     VARCHAR(75)      NOT NULL,
+    type_id     INT      NOT NULL,
     location_id       INT     NOT NULL,
     event_id        INT     NOT NULL,
 
@@ -75,6 +84,12 @@ VALUES ('Universal Orlando'),
        ('Universal Hollywood'),
        ('Universal Singapore'),
        ('Universal Japan');
+
+-- insert attraction_type records
+INSERT INTO attraction_type (type_name)
+VALUES ('House'),
+       ('Scare Zone'),
+       ('Show');
 
 -- insert attraction_location records
 INSERT INTO attraction_location (location_name)

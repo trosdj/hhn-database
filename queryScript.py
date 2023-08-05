@@ -15,47 +15,57 @@ db = mysql.connector.connect(**config)
 
 cursor = db.cursor()
 
-def addEntry():     # Adds a film entry to the database
-    filmName = input("\nFilm Name: ")
-    releaseYear = input("Release Year: ")
-    runtime = input("Runtime: ")
-    director = input("Director: ")
-    rating = input("Rating: ")
-    comment = input("Comment: ")
-    studio = input("Studio: ")
-    genre = input("Genre: ")
+def addAttraction():     # Adds an attraction entry to the attraction table
+    while True:
+        attractionName = input("\nAttraction Name: ")
+        description = input("Description: ")
+        print("[1] House [2] Scare Zone [3] Show")
+        attType = input("Attraction Type: ")
+        locationID = input("Location ID: ")
+        eventID = input("Event ID: ")
+        
+        sql = '''INSERT INTO attraction (attraction_name, attraction_description, attraction_type, location_id, event_id) 
+        VALUES (%s, %s, %s, %s, %s);
+        '''
+        attVal = (attractionName, description, attType, locationID, eventID)
 
-    # Checks if genre is already in genre table
-    cursor.execute("SELECT genre_name FROM genre")
-    check_genres = cursor.fetchall()
+        cursor.execute(sql, attVal)        # Runs the SQL to add an entry
+        db.commit()
 
-    for check in check_genres:
-        if check[0] == genre:
+        usrChoice = input("Would You like to add another event? y/n ")
+
+        if usrChoice == "y":
+            continue
+        elif usrChoice == "n":
             break
         else:
-            cursor.execute("INSERT INTO genre (genre_name) VALUES('{}')".format(genre))
-            break
+            print("Please choose y or n")
 
-    # Checks if studio is already in studio table
-    cursor.execute("SELECT studio_name FROM studio")
-    check_studio = cursor.fetchall()
+def addEvent():     # Adds an event entry to the hhn_event table
+    while True:
+        eventName = input("\nEvent Name: ")
+        eventYear = input("Event Year: ")
+        print("[1] Orlando [2] Hollywood [3] Singapore [4] Japan")
+        resortID = input("Resort ID: ")
+        
+        sql = '''INSERT INTO hhn_event (event_name, event_year, resort_id) 
+        VALUES (%s, %s, %s);
+        '''
+        eventVal = (eventName, eventYear, resortID)
 
-    for check in check_studio:
-        if check[0] == studio:
+        cursor.execute(sql, eventVal)        # Runs the SQL to add an entry
+        db.commit()
+
+        usrChoice = input("Would You like to add another event? 1 for y/0 for n ")
+
+        if usrChoice == "1":
+            continue
+        elif usrChoice == "0":
             break
         else:
-            cursor.execute("INSERT INTO studio (studio_name) VALUES('{}')".format(studio))
-            break
-    
-    sql = '''INSERT INTO film (film_name, film_releaseYear, film_runtime, film_director, film_rating, film_comment, studio_id, genre_id) 
-    VALUES (%s, %s, %s, %s, %s, %s, (SELECT studio_id FROM studio WHERE studio_name = %s),(SELECT genre_id FROM genre WHERE genre_name = %s) );
-    '''
-    filmVal = (filmName, releaseYear, runtime, director, rating, comment, studio, genre)
+            print("Please choose 1 or 0")
 
-    cursor.execute(sql, filmVal)        # Runs the SQL to add an entry
-    db.commit()
-
-def editEntry():    # Updates an existing entry // Can't update genre or studio yet
+"""def editEntry():    # Updates an existing entry // Can't update genre or studio yet
     print("\nSelect which film entry would you like to edit: ")
     film = input("Film: ")
 
@@ -114,36 +124,70 @@ def deleteEntry():      # Deletes an entry from the database
         else:
             print("Please confirm or deny if you would like to delete {}".format(film))
             continue
+"""
+def print_attractions():
+    attQuery = """
+        SELECT 
+            a.attraction_name, 
+            a.attraction_description, 
+            t.type_name, 
+            l.location_name, 
+            e.event_year
+        FROM 
+            attraction a
+        INNER JOIN
+            type t ON a.type_id = t.type_id
+        INNER JOIN
+            attraction_location l ON a.location_id = l.location_id
+        INNER JOIN
+            hhn_event e ON a.event_id = e.event_id
+    """
+    
+    cursor.execute(attQuery)
+    attractions = cursor.fetchall()
 
-def print_entries():
-    # Film Query
-    cursor.execute("SELECT film_name, film_director, film_rating, film_comment "
-                   "FROM film ")
-    films = cursor.fetchall()
+    print("\n-- HHN Attractions --\n")
 
-    print("\n-- Welcome to the Crumb Report --\n")
+    for attraction in attractions:      # Prints the attractions one by one
+        print("Year: {}\nAttraction: {}".format(attraction[4], attraction[0]))
+        print("Type: {}\nLocation: {}\n".format(attraction[2], attraction[3]))
+        print("Description: ".format(attraction[1]))
 
-    for film in films:      # Prints the films one by one
-        print("Title: {}\nDirector: {}".format(film[0], film[1]))
-        print("Rating: {}/5\nComment: {}\n".format(film[2], film[3]))
+def print_events():
+    attQuery = """
+        SELECT 
+            e.event_name
+            e.event_year
+            r.resort_name
+        FROM 
+            hhn_event e
+        INNER JOIN
+            resort r ON e.resort_id = r.resort_id
+    """
+    
+    cursor.execute(attQuery)
+    attractions = cursor.fetchall()
+
+    print("\n-- HHN Events --\n")
+
+    for attraction in attractions:      # Prints the attractions one by one
+        print("Year: {}\nEvent: {}".format(attraction[1], attraction[0]))
+        print("Resort: {}\n".format(attraction[2]))
 
 try:
-    print("\nWelcome to the Crumb Report!\nHome to Toast's very own movie review database!\n")
+    print("\nWelcome to the HHN Database!\nHome to all Universal Studios HHN information!\n")
         
     while True:
-        print("\n[1] Add Entry\n[2] Edit Entry\n[3] Delete Entry\n[4] Quit")
+        print("\n[1] Add Attraction\n[2] Add Event\n[3] Quit")
         usrChoice = input("What would you like to do: ")
 
         if usrChoice == "1":
-            addEntry()
+            addAttraction()
             break
         elif usrChoice == "2":
-            editEntry()
+            addEvent()
             break
         elif usrChoice == "3":
-            deleteEntry()
-            break
-        elif usrChoice == "4":
             print("Have a wonderful day!")
             break
         else:
@@ -156,3 +200,10 @@ except mysql.connector.Error as err:
         print("The specified database does not exist.")
     else:
         print(err)
+
+        """
+        SELECT e.event_year, e.event_name, r.resort_name 
+        FROM hhn_event e 
+        INNER JOIN resort r ON e.resort_id = r.resort_id
+        WHERE e.resort_id = 1;
+        """
